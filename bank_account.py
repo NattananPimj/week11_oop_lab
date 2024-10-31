@@ -1,16 +1,18 @@
 class Account:
-    def __init__(self, id, _type, name, balance):
-        self.id = id
+    def __init__(self, num, _type, name, balance):
+        self.id = num
         self.type = _type
         self.name = name
         self.balance = balance
 
     def deposit(self, amount):
+        if self.balance != "blank":
             self.balance += amount
 
     def withdraw(self, amount):
-        if self.balance >= amount:
-            self.balance -= amount
+        if self.balance != "blank":
+            if amount <= self.balance:
+                self.balance -= amount
 
     def __str__(self):
         return ('{' + str(self.id) + ',' + str(self.type) + ','
@@ -35,16 +37,24 @@ class AccountDB:
         return -1
 
     def search_public(self, account_num):
+        blank = Account("blank", "Blank account", "", 0)
         for account in self.account_database:
             if account.id == account_num:
                 return account
-        return None
+        return blank
 
     def __str__(self):
         s = ''
         for account in self.account_database:
             s += str(account) + ", "
         return s
+
+    def delete(self, account_num):
+        index = self.__search_private(account_num)
+        if index == -1:
+            print("account not found")
+        else:
+            del self.account_database[index]
 
 
 account1 = Account("0000", "saving", "David Patterson", 1000)
