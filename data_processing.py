@@ -1,81 +1,12 @@
 import csv, os
 
 
-# __location__ = os.path.realpath(
-#     os.path.join(os.getcwd(), os.path.dirname(__file__)))
-#
-# cities = []
-# with open(os.path.join(__location__, 'Cities.csv')) as f:
-#     rows = csv.DictReader(f)
-#     for r in rows:
-#         cities.append(dict(r))
-#
-# countries = []
-# with open(os.path.join(__location__, 'Countries.csv')) as f:
-#     rows = csv.DictReader(f)
-#     for r in rows:
-#         countries.append(dict(r))
-
-# # Print the average temperature of all the cities
-# print("The average temperature of all the cities:")
-# temps = []
-# for city in cities:
-#     temps.append(float(city['temperature']))
-# print(sum(temps) / len(temps))
-# print()
-#
-# # Print all cities in Italy
-# cities_temp = []
-# my_country = 'Italy'
-# for city in cities:
-#     if city['country'] == my_country:
-#         cities_temp.append(city['city'])
-# print("All the cities in", my_country, ":")
-# print(cities_temp)
-# print()
-#
-# # Print the average temperature for all the cities in Italy
-# temps = []
-# my_country = 'Italy'
-# for city in cities:
-#     if city['country'] == my_country:
-#         temps.append(float(city['temperature']))
-# print("The average temperature of all the cities in", my_country, ":")
-# print(sum(temps) / len(temps))
-# print()
-#
-# # Print the max temperature for all the cities in Italy
-# temps = []
-# my_country = 'Italy'
-# for city in cities:
-#     if city['country'] == my_country:
-#         temps.append(float(city['temperature']))
-# print("The max temperature of all the cities in", my_country, ":")
-# print(max(temps))
-# print()
-#
-# # Print the min temperature for all the cities in Italy
-# temps = []
-# my_country = 'Italy'
-# for city in cities:
-#     if city['country'] == my_country:
-#         temps.append(float(city['temperature']))
-# print("The min temperature of all the cities in", my_country, ":")
-# print(min(temps))
-# print()
-#
-# # - print the average temperature for all the cities in Italy
-# # - print the average temperature for all the cities in Sweden
-# # - print the min temperature for all the cities in Italy
-# # - print the max temperature for all the cities in Sweden
-
-# oop
 class Database:
-    def __init__(self, csv):
+    def __init__(self, data: str):
         __location__ = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
         self.dict_list = []
-        with open(os.path.join(__location__, csv)) as f:
+        with open(os.path.join(__location__, data)) as f:
             rows = csv.DictReader(f)
             for r in rows:
                 self.dict_list.append(dict(r))
@@ -87,8 +18,76 @@ class Database:
                 filtered_list.append(item)
         return filtered_list
 
-    def aggregate(self, aggregation_key, aggregation_function, condition):
+    def aggregate(self, aggregation_key):
         values = []
-        for items in self.filter(condition):
+        for items in self.dict_list:
             values.append(float(items[aggregation_key]))
-        return aggregation_function(values)
+        return values
+
+
+class Country:
+    def __init__(self, city, data):
+        self.data = Database(data)
+        self.cities = self.data.filter(lambda x: x['country'] == city)
+
+    def num_aggregate(self, aggregation_key):
+        values = []
+        for items in self.cities:
+            values.append(float(items[aggregation_key]))
+        return values
+
+    def aggregate(self, aggregation_key):
+        values = []
+        for items in self.cities:
+            values.append(items[aggregation_key])
+        return values
+
+    def max_value(self, key):
+        if self.check_nodata():
+            return "There is no data"
+        return max(self.num_aggregate(key))
+
+    def min_value(self, key):
+        if self.check_nodata():
+            return "There is no data"
+        return min(self.num_aggregate(key))
+
+    def mean_value(self, key):
+        if self.check_nodata():
+            return "There is no data"
+        return sum(self.num_aggregate(key)) / len(self.cities)
+
+    def check_nodata(self):
+        return len(self.cities) == 0
+
+
+
+# main
+
+# Print the average temperature of all the cities
+cities = Database('Cities.csv')
+print(cities.aggregate('temperature'))
+
+# Print all cities in Italy
+italy = Country('Italy', 'Cities.csv')
+print(italy)
+print(italy.aggregate('city'))
+
+# Print the average temperature for all the cities in Italy
+print(italy.mean_value('temperature'))
+
+# Print the max temperature for all the cities in Italy
+print(italy.max_value('temperature'))
+
+# Print the min temperature for all the cities in Italy
+print(italy.min_value('temperature'))
+
+sweden = Country('Swedish', 'Cities.csv')
+# - print the average temperature for all the cities in Sweden
+print(sweden.mean_value('temperature'))
+
+# - print the max temperature for all the cities in Sweden
+print(sweden.max_value('temperature'))
+
+# - print the min temperature for all the cities in Sweden
+print(sweden.min_value('temperature'))
